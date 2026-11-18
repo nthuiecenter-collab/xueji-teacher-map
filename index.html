@@ -1,0 +1,753 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>學跡老師操作地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+/* 版面：上面是一整條「一堂課的時間」流程圖（五段、每段幾個節點），下面是點到的那一步：左邊怎麼做、右邊假資料畫面。
+   顏色沿用學跡平台的代幣（藍紫色系品牌色、功能色、琥珀＝提醒）。 */
+:root {
+  --bg: #F4F6FA;
+  --surface: #FFFFFF;
+  --surface-2: #F8FAFC;
+  --muted-bg: #EEF1F6;
+  --text: #0F172A;
+  --text-2: #475569;
+  --text-3: #5B6474;
+  --border: #E2E8F0;
+  --border-strong: #8A93A6;
+  --brand: #4E4F6E;
+  --brand-deep: #33344A;
+  --brand-soft: #EDF2F7;
+  --brand-sky: #93B5CF;
+  --on-brand: #FFFFFF;
+  --s-ready: #1259C2;
+  --s-prep: #6941C6;
+  --s-live: #0D6B63;
+  --s-after: #A64007;
+  --s-other: #344054;
+  --ok: #026E41; --ok-soft: #ECFDF3;
+  --warn: #A64007; --warn-soft: #FFF6E5;
+  --bad: #B42318; --bad-soft: #FEF3F2;
+  --ai: #6941C6; --ai-soft: #F4F0FD;
+  --g1: #0E7490; --g2: #B54708; --g3: #3F7A2E; --g4: #6941C6; --g5: #1259C2; --g6: #9E2A6F;
+  --full-bg: #10121C; --full-fg: #F2F3F8;
+  --shadow: 0 1px 2px rgba(15,23,42,.06), 0 6px 20px rgba(15,23,42,.06);
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-head: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12131B; --surface: #1B1D29; --surface-2: #222534; --muted-bg: #2A2D3E;
+    --text: #E8EAF2; --text-2: #B8BDCC; --text-3: #A3A9BA; --border: #33374A; --border-strong: #6B7288;
+    --brand: #A9AAD6; --brand-deep: #C9CAEA; --brand-soft: #2A2C42; --brand-sky: #6F93AF; --on-brand: #15162A;
+    --s-ready: #7FB0FF; --s-prep: #B9A2F2; --s-live: #5CC7B9; --s-after: #F2A066; --s-other: #AEB8CC;
+    --ok: #5CD69B; --ok-soft: #173326; --warn: #F2A066; --warn-soft: #3A2716; --bad: #FF8A80; --bad-soft: #3C1D1B;
+    --ai: #B9A2F2; --ai-soft: #2C2442;
+    --g1: #4FC3DB; --g2: #F2A066; --g3: #8BCB72; --g4: #B9A2F2; --g5: #7FB0FF; --g6: #F08FC8;
+    --full-bg: #07080D; --full-fg: #F2F3F8;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12131B; --surface: #1B1D29; --surface-2: #222534; --muted-bg: #2A2D3E;
+  --text: #E8EAF2; --text-2: #B8BDCC; --text-3: #A3A9BA; --border: #33374A; --border-strong: #6B7288;
+  --brand: #A9AAD6; --brand-deep: #C9CAEA; --brand-soft: #2A2C42; --brand-sky: #6F93AF; --on-brand: #15162A;
+  --s-ready: #7FB0FF; --s-prep: #B9A2F2; --s-live: #5CC7B9; --s-after: #F2A066; --s-other: #AEB8CC;
+  --ok: #5CD69B; --ok-soft: #173326; --warn: #F2A066; --warn-soft: #3A2716; --bad: #FF8A80; --bad-soft: #3C1D1B;
+  --ai: #B9A2F2; --ai-soft: #2C2442;
+  --g1: #4FC3DB; --g2: #F2A066; --g3: #8BCB72; --g4: #B9A2F2; --g5: #7FB0FF; --g6: #F08FC8;
+  --full-bg: #07080D; --full-fg: #F2F3F8;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 24px; }
+h1, h2, h3 { font-family: var(--font-head); text-wrap: balance; margin: 0; letter-spacing: .01em; }
+h1 { font-size: clamp(26px, 3.4vw, 36px); color: var(--brand-deep); }
+h2 { font-size: 22px; }
+h3 { font-size: 16px; font-family: var(--font-body); font-weight: 700; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--brand-sky); outline-offset: 2px; }
+
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 32px; align-items: end; }
+.intro .lede { color: var(--text-2); max-width: 62ch; margin-top: 8px; }
+.eyebrow { font-size: 13px; letter-spacing: .12em; color: var(--text-3); font-weight: 500; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
+.legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); display: inline-block; }
+@media (max-width: 760px) { .intro { grid-template-columns: 1fr; } }
+
+.map { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 18px; overflow-x: auto; }
+.lanes { display: grid; grid-template-columns: repeat(5, minmax(200px, 1fr)); gap: 0; min-width: 1040px; }
+.lane { position: relative; padding: 0 14px; display: flex; flex-direction: column; gap: 8px; }
+.lane + .lane { border-left: 1px dashed var(--border); }
+.lane:not(:last-child)::after { content: ""; position: absolute; top: 14px; right: -9px; width: 16px; height: 16px; border-top: 2px solid var(--border-strong); border-right: 2px solid var(--border-strong); transform: rotate(45deg); background: var(--surface); z-index: 1; }
+.lane-head { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; margin-bottom: 2px; border-bottom: 3px solid var(--c); }
+.lane-head b { font-size: 16px; color: var(--c); }
+.lane-head small { color: var(--text-3); font-size: 12.5px; }
+.node { display: grid; grid-template-columns: 26px minmax(0,1fr); gap: 8px; align-items: start; text-align: left; padding: 8px 10px; border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px; cursor: pointer; position: relative; transition: border-color .15s, background .15s, transform .15s; }
+.node:hover { border-color: var(--c); transform: translateY(-1px); }
+.node[aria-current="step"] { background: var(--c); border-color: var(--c); color: var(--on-brand); }
+.node[aria-current="step"] .num { background: var(--on-brand); color: var(--c); }
+.node[aria-current="step"] small { color: var(--on-brand); opacity: .9; }
+.node .num { width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--c); color: var(--c); display: grid; place-items: center; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.node b { font-size: 14px; font-weight: 700; display: block; line-height: 1.35; }
+.node small { font-size: 12px; color: var(--text-3); display: block; line-height: 1.4; margin-top: 2px; }
+.node + .node::before { content: ""; position: absolute; left: 22px; top: -9px; height: 9px; border-left: 2px solid var(--border-strong); }
+.map-note { margin-top: 12px; font-size: 13px; color: var(--text-3); }
+
+.step { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px; align-items: start; scroll-margin-top: 16px; }
+@media (max-width: 960px) { .step { grid-template-columns: 1fr; } }
+.guide { display: flex; flex-direction: column; gap: 16px; }
+.crumb { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 13px; color: var(--text-2); }
+.crumb span { background: var(--muted-bg); padding: 2px 8px; border-radius: 999px; }
+.crumb em { font-style: normal; color: var(--text-3); }
+.stage-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--c); }
+.stage-tag i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.why { color: var(--text-2); }
+.howto { counter-reset: s; display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.howto li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0,1fr); gap: 10px; }
+.howto li::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+.howto b { color: var(--brand-deep); }
+.tips { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: var(--warn-soft); border-radius: var(--r); border: 1px solid color-mix(in srgb, var(--warn) 25%, transparent); }
+.tips h3 { color: var(--warn); font-size: 14px; }
+.tips ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.pager { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pager button { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font-weight: 500; }
+.pager button.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.pager button:disabled { opacity: .4; cursor: default; }
+.count { font-size: 13px; color: var(--text-3); align-self: center; font-variant-numeric: tabular-nums; }
+
+.screen { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
+.bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--brand); color: var(--on-brand); font-size: 13px; }
+.bar .dots { display: flex; gap: 5px; }
+.bar .dots i { width: 9px; height: 9px; border-radius: 50%; background: color-mix(in srgb, var(--on-brand) 55%, transparent); }
+.bar .addr { flex: 1; min-width: 0; background: color-mix(in srgb, var(--on-brand) 16%, transparent); padding: 2px 10px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .acct { white-space: nowrap; }
+.app { display: grid; grid-template-columns: 132px minmax(0,1fr); min-height: 420px; }
+.side { background: var(--surface-2); border-right: 1px solid var(--border); padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.side .logo { font-family: var(--font-head); font-weight: 700; color: var(--brand-deep); padding: 0 8px 10px; font-size: 15px; }
+.side a { padding: 6px 8px; border-radius: 6px; color: var(--text-2); text-decoration: none; }
+.side a.on { background: var(--brand-soft); color: var(--brand-deep); font-weight: 700; }
+.main { padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (max-width: 560px) { .app { grid-template-columns: 1fr; } .side { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--border); } .side .logo { width: 100%; padding-bottom: 4px; } }
+.sub { display: grid; grid-template-columns: 128px minmax(0,1fr); gap: 12px; }
+.sub nav { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; }
+.sub nav b { font-size: 11.5px; color: var(--text-3); letter-spacing: .08em; margin-top: 6px; }
+.sub nav span { padding: 4px 8px; border-radius: 6px; color: var(--text-2); }
+.sub nav span.on { background: var(--brand); color: var(--on-brand); font-weight: 700; }
+@media (max-width: 560px) { .sub { grid-template-columns: 1fr; } .sub nav { flex-direction: row; flex-wrap: wrap; } .sub nav b { width: 100%; } }
+.ttl { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ttl h4 { margin: 0; font-size: 17px; font-family: var(--font-head); }
+.ttl small { color: var(--text-3); font-size: 12.5px; }
+.lead { font-size: 13px; color: var(--text-2); }
+.card { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: var(--surface); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border-strong); background: var(--surface); font-size: 12.5px; white-space: nowrap; }
+.btn.p { background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: 700; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; padding: 1px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; border: 1px solid transparent; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 30%, transparent); }
+.pill.ai { background: var(--ai-soft); color: var(--ai); border-color: color-mix(in srgb, var(--ai) 30%, transparent); }
+.pill.grey { background: var(--muted-bg); color: var(--text-2); }
+.field { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; color: var(--text-2); min-width: 0; }
+.input { border: 1px solid var(--border-strong); border-radius: 7px; padding: 5px 9px; background: var(--surface); color: var(--text); font-size: 13px; min-height: 30px; min-width: 0; overflow-wrap: anywhere; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+th { background: var(--muted-bg); color: var(--text-2); font-weight: 700; }
+tr:last-child td { border-bottom: 0; }
+.stat b { font-size: 22px; font-variant-numeric: tabular-nums; color: var(--brand-deep); line-height: 1.2; }
+.stat span { font-size: 12px; color: var(--text-3); }
+.steps-bar { display: flex; align-items: center; font-size: 12px; flex-wrap: wrap; row-gap: 6px; }
+.steps-bar span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-3); }
+.steps-bar span i { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 11px; }
+.steps-bar span.done i, .steps-bar span.on i { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.steps-bar span.on { color: var(--text); font-weight: 700; }
+.steps-bar hr { flex: 1; border: 0; border-top: 1.5px solid var(--border); margin: 0 8px; min-width: 14px; }
+.note { border: 1px solid var(--border); border-left: 4px solid var(--c, var(--g1)); border-radius: 0 6px 6px 0; padding: 7px 9px; background: var(--surface); font-size: 12.5px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.note .h { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11.5px; color: var(--text-3); }
+.note .q { color: var(--text-3); font-size: 12px; }
+.note .q b { color: var(--text-2); margin-right: 4px; }
+.photo { aspect-ratio: 4/3; max-width: 100%; border-radius: 6px; background: linear-gradient(135deg, color-mix(in srgb, var(--g1) 30%, var(--surface)), color-mix(in srgb, var(--g3) 30%, var(--surface))); display: grid; place-items: center; color: var(--text-2); font-size: 12px; }
+.chk { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; }
+.chk i { flex: none; width: 15px; height: 15px; margin-top: 3px; border-radius: 4px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; font-style: normal; font-size: 10px; }
+.chk.on i { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.chk.lock i { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.chk.open i { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.wall td.n { text-align: center; }
+.wall td.n b { display: inline-grid; place-items: center; min-width: 22px; height: 20px; border-radius: 5px; background: color-mix(in srgb, var(--s-live) 18%, var(--surface)); color: var(--s-live); }
+.wall td.n.z { color: var(--text-3); }
+.bars { display: flex; flex-direction: column; gap: 6px; }
+.bars div { display: grid; grid-template-columns: 56px minmax(0,1fr) 44px; gap: 8px; align-items: center; font-size: 12px; }
+.bars u { display: block; height: 10px; border-radius: 3px; background: var(--brand-sky); text-decoration: none; }
+.bars em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.chat { display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+.chat p { padding: 7px 10px; border-radius: 10px; max-width: 88%; }
+.chat .me { align-self: flex-end; background: var(--brand); color: var(--on-brand); }
+.chat .bot { align-self: flex-start; background: var(--muted-bg); }
+.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.group { border: 1.5px solid var(--c); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: color-mix(in srgb, var(--c) 6%, var(--surface)); }
+.group .gh { display: flex; justify-content: space-between; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--c); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chips span { font-size: 12px; padding: 2px 7px; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+.chips span.lead-s { border-color: var(--c); font-weight: 700; }
+.qr { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 14px; align-items: start; }
+@media (max-width: 520px) { .qr { grid-template-columns: 1fr; } }
+.qr svg { width: 150px; height: 150px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+.code6 { font-size: 26px; font-weight: 700; letter-spacing: .18em; font-variant-numeric: tabular-nums; color: var(--brand-deep); }
+.slot { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+.slot .sh { display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 700; }
+.slot .sh i { font-style: normal; width: 22px; height: 22px; border-radius: 6px; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; font-size: 12px; }
+.mono { font-variant-numeric: tabular-nums; }
+.full { background: var(--full-bg); color: var(--full-fg); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.full .seatbig { font-size: 30px; font-weight: 700; }
+.full p { font-size: 16px; }
+.full small { font-size: 12px; opacity: .8; }
+.mock-flag { font-size: 11.5px; color: var(--text-3); text-align: right; padding: 6px 12px; border-top: 1px solid var(--border); background: var(--surface-2); }
+.timeline { display: flex; flex-direction: column; gap: 6px; }
+.tl-row { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 8px; align-items: center; font-size: 12px; }
+.tl-track { position: relative; height: 16px; background: var(--muted-bg); border-radius: 4px; overflow: hidden; }
+.tl-track u { position: absolute; top: 0; bottom: 0; text-decoration: none; opacity: .85; }
+.split { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap: 10px; }
+@media (max-width: 560px) { .split { grid-template-columns: 1fr; } }
+.menu { min-width: 150px; padding: 6px 0; gap: 0; }
+.menu span { padding: 4px 12px; font-size: 13px; }
+.menu span.on { background: var(--brand-soft); font-weight: 700; }
+
+.view-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.view-tabs button { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font-size: 13px; }
+.view-tabs button[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: 700; }
+.shot { display: flex; flex-direction: column; gap: 8px; }
+.shot figure { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.shot figure button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.shot img { display: block; width: 100%; height: auto; aspect-ratio: 2720 / 1614; object-fit: cover; object-position: top; background: var(--muted-bg); }
+.shot figcaption { padding: 8px 12px; font-size: 13px; color: var(--text-2); border-top: 1px solid var(--border); background: var(--surface-2); }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumbs button { padding: 0; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; width: 96px; cursor: pointer; background: var(--muted-bg); }
+.thumbs button[aria-current="true"] { border-color: var(--brand); }
+.thumbs img { display: block; width: 100%; aspect-ratio: 2720 / 1614; object-fit: cover; object-position: top; }
+.shot-note { font-size: 12.5px; color: var(--text-3); }
+/* hidden 屬性要自己寫一條：下面的 display: grid 會蓋過瀏覽器預設的 hidden，放大框就會一打開頁面就蓋住、關不掉 */
+.lightbox[hidden] { display: none !important; }
+.lightbox { position: fixed; inset: 0; z-index: 50; background: rgba(8,9,15,.86); display: grid; grid-template-rows: auto minmax(0,1fr); padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); gap: 8px; }
+.lightbox .lb-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #F2F3F8; font-size: 14px; }
+.lightbox .lb-bar button { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.5); background: transparent; color: #F2F3F8; cursor: pointer; }
+.lightbox .lb-img { overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+.lightbox img { max-width: 100%; height: auto; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { .node, .node:hover { transition: none; transform: none; } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <div>
+      <p class="eyebrow">學跡 LEARNTRACE・老師教學用</p>
+      <h1>學跡老師操作地圖</h1>
+      <p class="lede">照一學期用平台的順序排：先設好班級與課程，再備課、上課，課後看學生的學習狀況。點上面任何一格，下面會出現「在哪裡」「怎麼做」，以及那一頁的實際截圖。截圖是平台的假資料版拍的，班級、學生、作品全部是假的；另有一張畫出來的示意圖，可以切換著看。</p>
+    </div>
+    <div class="legend" id="legend"></div>
+  </header>
+
+  <section class="map" aria-label="操作流程圖">
+    <div class="lanes" id="lanes"></div>
+    <p class="map-note">箭頭是建議的順序。第一次使用照 ① 往下走；之後每一堂課從「② 備課」開始，或直接到首頁按〔開始上課〕。</p>
+  </section>
+
+  <section class="step" id="step" aria-live="polite"></section>
+</div>
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="放大的截圖"><div class="lb-bar"><span id="lb-cap"></span><button type="button" id="lb-close">關閉</button></div><div class="lb-img"><img id="lb-img" alt=""></div></div>
+
+<script>
+/* ───── 假資料 ───── */
+const NAMES = ['王小明','林佳穎','陳柏宇','張雅婷','李承恩','黃詩涵','吳宥廷','蔡欣妤','劉冠廷','楊子晴','許家豪','鄭芷涵','謝秉翰','郭品妍','洪翊安','曾若瑜','邱柏睿','廖心怡','賴宇恩','周采潔','葉承佑','蘇芯慈','江冠宇','呂語彤'];
+const CLS = '五年甲班';
+const SCHOOL = '示範國小';
+const COURSE = '自然科學・水的旅行';
+const UNITS = ['水的三態', '蒸發與凝結', '水循環'];
+const GROUPS = [
+  { name: '第 1 組', c: 'var(--g1)', seats: [1, 5, 9, 13], lead: 5 },
+  { name: '第 2 組', c: 'var(--g2)', seats: [2, 6, 10, 14], lead: 2 },
+  { name: '第 3 組', c: 'var(--g3)', seats: [3, 7, 11, 15], lead: 11 },
+  { name: '第 4 組', c: 'var(--g4)', seats: [4, 8, 12, 16], lead: 8 },
+  { name: '第 5 組', c: 'var(--g5)', seats: [17, 19, 21, 23], lead: 19 },
+  { name: '第 6 組', c: 'var(--g6)', seats: [18, 20, 22, 24], lead: 24 },
+];
+const TASKS = [
+  { label: '大題 1', title: '觀察水滴', c: 'var(--g1)' },
+  { label: '大題 2', title: '提出問題', c: 'var(--g2)' },
+  { label: '任務 1', title: '冰塊融化實驗', c: 'var(--g4)' },
+];
+/* 固定種子，每次打開長得一樣 */
+let seed = 20261113;
+const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 2 ** 32; };
+const WALL = NAMES.map((_, i) => {
+  const no = i + 1;
+  if (no === 14 || no === 21) return { no, joined: false, cells: [0, 0, 0] };
+  return { no, joined: true, battery: no === 9, offline: no === 17, cells: TASKS.map((_, t) => (no === 6 && t === 2 ? 0 : Math.max(0, Math.round(rnd() * 3 - (t === 2 ? 1.2 : 0.3))))) };
+});
+const DASH = [1, 2, 3, 4, 5, 6].map(no => [no, ...UNITS.map((_, j) => (j === 2 ? null : Math.round(3 + rnd() * 7)))]);
+const TRACKS = [1, 2, 3, 4, 5].map(() => [0.05 + rnd() * 0.1, 0.3 + rnd() * 0.15, 0.6 + rnd() * 0.2]);
+
+/* ───── 小工具 ───── */
+const MENU = ['首頁', '班級管理', '課程', '學習歷程', '學習紀錄探究', '設定'];
+function frame(path, active, body, opts = {}) {
+  const side = `<nav class="side" aria-label="選單"><div class="logo">學跡</div>${MENU.map(m => `<a class="${m === active ? 'on' : ''}">${m}</a>`).join('')}</nav>`;
+  return `<div class="screen">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="addr">learntrace.17learn.cc${path}</span><span class="acct">陳老師 ▾</span></div>
+    ${opts.noSide ? `<div class="main">${body}</div>` : `<div class="app">${side}<div class="main">${body}</div></div>`}
+    <div class="mock-flag">示意畫面・假資料</div>
+  </div>`;
+}
+const SESSION_NAV = [['開始上課', ['開始上課', '教師導學', '學習摘要']], ['備課', ['教材', 'APP 任務安排', '分組', 'AI 引導', '教學筆記']], ['學習歷程', ['學生學習歷程', '下載學習資料']]];
+function sessionPage(active, body) {
+  const nav = SESSION_NAV.map(([g, items]) => `<b>${g}</b>${items.map(x => `<span class="${x === active ? 'on' : ''}">${x}</span>`).join('')}`).join('');
+  return frame('/session?id=…', '課程', `<div class="ttl"><h4>${CLS} · ${COURSE}</h4><small>${UNITS[1]} · 2026-11-13</small></div><div class="sub"><nav aria-label="這一堂的選單">${nav}</nav><div style="display:flex;flex-direction:column;gap:10px;min-width:0">${body}</div></div>`);
+}
+const stepsBar = (labels, on) => `<div class="steps-bar">${labels.map((l, i) => `${i ? '<hr>' : ''}<span class="${i < on ? 'done' : i === on ? 'on' : ''}"><i>${i < on ? '✓' : i + 1}</i>${l}</span>`).join('')}</div>`;
+const pill = (t, k = 'grey') => `<span class="pill ${k}">${t}</span>`;
+const learningTabs = on => `<div class="row">${['課中紀錄', '課後作業', '學習資料分析', '行為分析', '班級儀表板'].map(t => `<span class="btn ${t === on ? 'p' : ''}">${t}</span>`).join('')}</div>`;
+function qrSvg() {
+  let s = 99; const r = () => { s = (s * 69069 + 1) >>> 0; return s / 2 ** 32; };
+  const n = 25; let rects = '';
+  const finder = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7" fill="#111"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="#111"/>`;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const inF = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
+    if (!inF && r() > 0.52) rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="#111"/>`;
+  }
+  return `<svg viewBox="0 0 ${n} ${n}" role="img" aria-label="示意 QR code，不能掃">${rects}${finder(0, 0)}${finder(n - 7, 0)}${finder(0, n - 7)}</svg>`;
+}
+
+
+/* ───── 實際畫面截圖（平台假資料版，2026-11-13 拍） ───── */
+const SHOTS = {
+  login: [['login', '登入頁。截圖是假資料版，下面那排「示範帳號」正式站沒有。']],
+  onboard: [['onboard-intro', '第一次登入先有四頁介紹，可以按「跳過介紹」。'], ['onboard-class', '接著三步：個人資料 → 班級 → 學生名單。這是第 2 步「班級」。']],
+  class: [['class', '班級管理：選好班級後的名冊。影音授權、研究資料都在同一列改。'], ['roster-review', '匯入名單時先跳出「確認名單」，看過再按確認。']],
+  course: [['course', '新增課程：課名、班級、領域、課程顏色。']],
+  unit: [['unit', '點進一門課的「單元」分頁，每個單元都有「今天上這個」。']],
+  materials: [['materials', '這一堂可用的教材，下面可以拖檔案進來。']],
+  activity: [['activity', '學校登記了學生 APP 才會列出大題（示範學校沒登記，所以是空的）；下面是剛新增的臨時任務。']],
+  groups: [['groups', '按「隨機分」當場分好，每組右上角選組長，會自動儲存。']],
+  guide: [['guide', '先選領域，下面是 PROGRESS 八格，每一格都已經勾好常用的句子。']],
+  note: [['note', '教學筆記，只有你看得到。']],
+  home: [['home-1', '第 1 步：選課程，標著每門課上次上到哪。'], ['home-2', '第 2 步：選單元。'], ['home-3', '第 3 步：按「開始上課 →」。']],
+  start: [['start', 'QR 與六位數加入碼；右邊是已加入的座號，選錯的按 ×。「模擬加入」那排按鈕只在假資料版。']],
+  progress: [['progress', '進度：每個座號、每個大題收到幾件。']],
+  works: [['works', '所有資料：一個大題一段，便條上有題目、AI 與學生的對話。'], ['fullscreen', '點任何一件就全螢幕：只顯示座號，標出第幾版、有沒有問過 AI。']],
+  summary: [['summary-facts', '最上面是數字（收到幾件、問 AI 幾句……），會自己更新。'], ['summary-ai', '按「更新摘要」之後，AI 依向度整理，每一類附原句與座號。']],
+  inclass: [['inclass', '一節一列，點開就是那一堂收到的東西。']],
+  homework: [['homework', '上傳學生作業，選是全班、哪一組或哪一位的。']],
+  analysis: [['analysis', '這個範圍做過的 AI 分析都收在這裡，點開看依據與建議。']],
+  behaviour: [['behaviour', '學生 APP 的操作紀錄：操作時間、每一步花多久、問 AI 幾次。']],
+  dashboard: [['dashboard', '整個班的數字：上過幾節、收到幾件、每位學生每個單元幾件。']],
+  explore: [['explore', '選好範圍跟 AI 對話；有現成的問題可以直接按。截圖是假資料版，AI 的回答是佔位文字。']],
+  export: [['timeline', '學生學習歷程：這一堂收到的紀錄，下面有每位學生的時間軸。'], ['export', '下載學習資料：選範圍、存到哪裡、遮臉版或原檔。']],
+  assistant: [['assistant', '右上角「AI 助手」打開的側欄：先選班級，勾了同意才能問。']],
+  settings: [['settings', '設定：個人資料、登入方式（綁定 Google）。']],
+  report: [['report', '右上角帳號選單的「回報問題」。']],
+};
+
+/* ───── 五段 ───── */
+const STAGES = [
+  { key: 'ready', name: '① 第一次使用', hint: '只做一次：帳號、班級、課程', c: 'var(--s-ready)' },
+  { key: 'prep', name: '② 備課', hint: '上課前：教材、任務、分組、AI', c: 'var(--s-prep)' },
+  { key: 'live', name: '③ 上課', hint: '課中：開 QR、看進度、帶討論', c: 'var(--s-live)' },
+  { key: 'after', name: '④ 課後', hint: '看學生的學習狀況', c: 'var(--s-after)' },
+  { key: 'other', name: '⑤ 隨時可用', hint: 'AI 助手、設定、回報問題', c: 'var(--s-other)' },
+];
+
+/* ───── 每一步 ───── */
+const STEPS = [
+  { id: 'login', stage: 'ready', title: '登入與第一次設定', short: '換密碼、綁信箱', where: ['登入頁'],
+    why: '研究團隊會透過學校發給你一組帳號與初始密碼（例如 lili01）。第一次登入要先換密碼、綁一個信箱，之後忘記密碼才收得到信。',
+    how: ['在登入頁「帳號或電子郵件」打 <b>lili01</b>，密碼打初始密碼。', '第一次登入會要你 <b>換一組新密碼</b>。', '接著 <b>綁信箱</b>：輸入信箱，到信箱收六位數驗證碼填回來；也可以改按「綁定 Google 帳號」。', '綁好之後，下次可以直接用 Google 登入。'],
+    tips: ['第一次請用帳號密碼登入，<b>不要先按「使用 Google 帳號登入」</b>。', '忘記密碼：登入頁按「忘記密碼」，信會寄到你綁的信箱。'],
+    screen: () => frame('/account-setup', '', `
+      ${stepsBar(['換密碼', '綁信箱'], 1)}
+      <div class="card" style="max-width:380px">
+        <h4 style="margin:0;font-family:var(--font-head)">綁定信箱</h4>
+        <p class="lead">忘記密碼時，重設信會寄到這個信箱。</p>
+        <span class="field">信箱<span class="input">chen.teacher@example.edu.tw</span></span>
+        <span class="field">驗證碼（六位數）<span class="input mono">4 8 2 7 1 _</span></span>
+        <div class="row"><span class="btn p">確認綁定</span><span class="btn">改綁 Google 帳號</span></div>
+        <p class="lead">信裡也有一個連結，點了一樣可以完成。</p>
+      </div>`, { noSide: true }) },
+
+  { id: 'onboard', stage: 'ready', title: '第一次引導', short: '個人資料 → 班級 → 學生名單', where: ['登入後自動出現'],
+    why: '第一次登入會先看四頁介紹，再帶你走三步，做完就能開始建課程。學期與節次時間平台會用學校已有的，不用自己填。',
+    how: ['先看四頁介紹（可以按 <b>跳過介紹</b>）。', '<b>個人資料</b>：姓名、確認學校。', '<b>班級</b>：新增你教的班（例如五年甲班）。', '<b>學生名單</b>：貼上或匯入座號、姓名、學號。', '做完會到「課程」頁，從那裡新增第一門課。'],
+    tips: ['名單之後可以在「班級管理」再補、再改。'],
+    screen: () => frame('/onboarding', '', `
+      ${stepsBar(['個人資料', '班級', '學生名單'], 2)}
+      <div class="card">
+        <div class="ttl"><h4>${CLS}的學生名單</h4><small>貼上或選檔案，一行一位</small></div>
+        <div class="input" style="min-height:96px;white-space:pre-line;font-size:12.5px">1　${NAMES[0]}　S11301
+2　${NAMES[1]}　S11302
+3　${NAMES[2]}　S11303
+4　${NAMES[3]}　S11304
+…</div>
+        <div class="row"><span class="btn">選 CSV／Excel 檔</span><span class="btn">下載空白格式</span><span class="btn p">下一步：確認名單</span></div>
+      </div>`, { noSide: true }) },
+
+  { id: 'class', stage: 'ready', title: '班級管理', short: '名冊、匯入、影音授權、課程調整', where: ['班級管理'],
+    why: '名冊是整個平台的基礎：學生 APP 用座號連進來。你自己的畫面看得到姓名，給全班看的投影只顯示座號。',
+    how: ['先在上方 <b>選班級</b>，下面才會出現那一班的名冊。', '要整批加學生：按 <b>匯入名單</b>。讀完檔案會先跳「確認名單」，看哪幾列被拿掉、欄位對不對，按確認才存。', '家長不同意拍照錄影的學生，把「影音授權」改成 <b>不授權</b>，一改就存。', '需要特別照顧的學生，點「課程調整」寫下教學上的調整，可以請 AI 幫你整理。'],
+    tips: ['名冊這裡不排分組，分組在每一堂課的「分組」排。', '課程調整不要寫病史、家庭狀況這類隱私。'],
+    screen: () => frame('/students', '班級管理', `
+      <div class="ttl"><h4>班級管理</h4><div class="row"><span class="btn">＋ 新增班級</span><span class="btn p">匯入名單</span></div></div>
+      <div class="row"><span class="field">班級<span class="input">${CLS}（24 位）</span></span></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>座號</th><th>姓名</th><th>學號</th><th>影音授權</th><th>課程調整</th></tr></thead>
+        <tbody>${NAMES.slice(0, 6).map((n, i) => `<tr><td>${i + 1}</td><td>${n}</td><td>S1130${i + 1}</td><td>${i === 3 ? pill('不授權', 'warn') : pill('同意', 'ok')}</td><td>${i === 1 ? '<span class="btn">已寫・點開</span>' : '<span class="btn">寫調整</span>'}</td></tr>`).join('')}
+        <tr><td colspan="5" style="color:var(--text-3)">…還有 18 位</td></tr></tbody></table></div>`) },
+
+  { id: 'course', stage: 'ready', title: '新增課程', short: '課名＋班級＋領域', where: ['課程', '＋ 新增課程'],
+    why: '一門課對到一個班。平台不用排課表，哪天上課就哪天按「開始上課」。',
+    how: ['到 <b>課程</b>，按右上 <b>＋ 新增課程</b>。', '填課名、選班級、選 <b>領域</b>（AI 引導會用到）。', '學校有兩支以上的學生 APP 時，選這門課用哪一支；不用 APP 的課選「不使用 APP」。', '第一次帶學生用 AI 眼鏡，課名可以直接選 <b>「AI 眼鏡第一堂課」</b>，平台會建好一堂上完的練習課。'],
+    tips: ['之後要換 APP，在這一堂的「APP 任務安排」最上面改。'],
+    screen: () => frame('/courses?new=1', '課程', `
+      <div class="ttl"><h4>課程</h4><span class="btn">＋ 新增課程</span></div>
+      <div class="grid2">
+        <div class="card"><b>${COURSE}</b><span class="lead">${CLS}・3 個單元・上過 5 堂</span><span>${pill('上次上到：蒸發與凝結', 'ok')}</span></div>
+        <div class="card"><b>AI 眼鏡第一堂課</b><span class="lead">${CLS}・1 個單元</span><span>${pill('還沒上', 'grey')}</span></div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <b>新增課程</b>
+        <div class="grid3">
+          <span class="field">課名<span class="input">社會・家鄉的河流</span></span>
+          <span class="field">班級<span class="input">${CLS}</span></span>
+          <span class="field">領域<span class="input">社會</span></span>
+          <span class="field">學生 APP<span class="input">部落探險隊</span></span>
+        </div>
+        <div class="row" style="justify-content:center"><span class="btn p">建立課程</span></div>
+      </div>`) },
+
+  { id: 'unit', stage: 'ready', title: '單元與教材', short: '一門課分幾個單元', where: ['課程', '點一門課', '單元／教材'],
+    why: '學生交的東西會照「課程 → 單元」整理，課後才找得到。教材也照單元放。',
+    how: ['點進一門課，第一個分頁是 <b>單元</b>，按「新增單元」填名稱與目標。', '<b>教材</b> 分頁照單元上傳講義、簡報、圖片。', '要讓學生 APP 拿到某份教材（例如參考圖），勾「給學生 APP」並選掛在哪一題。'],
+    tips: ['單元目標寫一兩句就好，AI 引導與 AI 助手會參考它。'],
+    screen: () => frame('/course?id=…', '課程', `
+      <div class="ttl"><h4>${COURSE}</h4><small>${CLS}</small></div>
+      <div class="row"><span class="btn p">單元</span><span class="btn">教材</span></div>
+      ${UNITS.map((u, i) => `<div class="card"><div class="ttl"><b>${i + 1}. ${u}</b>${i === 1 ? pill('上次上到這裡', 'ok') : i === 0 ? pill('上過 2 堂', 'grey') : pill('還沒上', 'grey')}</div><span class="lead">${['認識固體、液體、氣體三種樣子', '觀察水蒸發成水蒸氣、再凝結成水滴', '把水在大自然裡的旅行串起來'][i]}</span><div class="row"><span class="btn ${i === 1 ? 'p' : ''}">今天上這個</span><span class="btn">教材 ${[3, 2, 0][i]} 份</span></div></div>`).join('')}
+      <span class="btn" style="align-self:flex-start">＋ 新增單元</span>`) },
+
+  { id: 'materials', stage: 'prep', title: '教材', short: '這堂課要用的檔案', where: ['首頁或課程', '點這一堂', '備課 › 教材'],
+    why: '這一堂的「教材」只列這一堂、這個單元與整門課共用的檔案，上課時一個地方就找得到。',
+    how: ['上傳這堂課要用的檔案。', '勾 <b>給學生 APP</b>：APP 可以把它放進某一題當參考圖。', '要讓 AI 小幫手參考教材內容，到「AI 引導」的「補充資料」勾它，按「抽出文字」。'],
+    tips: ['勾了「給學生 APP」的教材，有這堂課加入碼的人都拿得到，不要放有學生資料的檔案。', '圖片與掃描檔抽不出文字，AI 讀不到。'],
+    screen: () => sessionPage('教材', `
+      <div class="ttl"><h4>教材</h4><span class="btn p">＋ 上傳教材</span></div>
+      ${[['蒸發實驗學習單.pdf', '這個單元', true, false], ['水循環簡報.pptx', '整門課共用', false, true], ['杯子外的水珠.jpg', '這一堂', true, false]].map(([n, sc, app, ai]) => `<div class="card"><div class="ttl"><b>${n}</b><small>${sc}</small></div><div class="row">${app ? pill('給學生 APP・大題 1', 'ok') : pill('只有老師看', 'grey')}${ai ? pill('AI 引導補充資料・2,140 字', 'ai') : ''}</div></div>`).join('')}`) },
+
+  { id: 'activity', stage: 'prep', title: 'APP 任務安排', short: 'APP 題目＋臨時任務', where: ['點這一堂', '備課 › APP 任務安排'],
+    why: '學生 APP 裡原本就有題目（大題）。你可以看題目、改研究團隊打開的那幾題的字，再加這堂課自己的「臨時任務」。',
+    how: ['最上面確認 <b>這門課用哪一支 APP</b>（或不使用 APP）。', '看 APP 的大題與題目：<b>紅色鎖頭</b>不能改，<b>綠色打開的鎖</b>可以改字。', '按 <b>＋ 臨時任務</b>：寫標題、說明，勾要交哪幾種（文字、語音、照片、影片）。', '可以選臨時任務排在 APP 的哪個大題後面。'],
+    tips: ['臨時任務只存在這一堂，不會影響同校其他老師。', '選「不使用 APP」的課，開始上課與 AI 引導會收起來。'],
+    screen: () => sessionPage('APP 任務安排', `
+      <div class="row"><span class="field">這門課用的學生 APP<span class="input">部落探險隊</span></span></div>
+      <div class="card"><b>APP 的大題</b>
+        <div class="chk lock"><i>🔒</i><span>大題 1　觀察水滴：「杯子外面的水是從哪裡來的？」</span></div>
+        <div class="chk open"><i>✓</i><span>大題 2　提出問題：<span class="input" style="display:inline-block;min-height:0;padding:1px 6px">你還想知道水的什麼祕密？</span>（可以改字）</span></div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--g4)"><div class="ttl"><b>任務 1　冰塊融化實驗</b><small>臨時任務</small></div>
+        <span class="lead">把冰塊放在三種杯子裡，每 5 分鐘拍一張照片，寫下你看到的變化。</span>
+        <div class="row">${pill('照片', 'ok')}${pill('文字', 'ok')}${pill('語音', 'grey')}${pill('影片', 'grey')}<span class="lead">排在：大題 1 後面</span></div>
+      </div>
+      <span class="btn" style="align-self:flex-start">＋ 臨時任務</span>`) },
+
+  { id: 'groups', stage: 'prep', title: '分組', short: '幾組、隨機或手動、選組長', where: ['點這一堂', '備課 › 分組'],
+    why: '分好組，教師導學就能照組看學生交的東西；投影會顯示組名，不顯示姓名。',
+    how: ['填 <b>幾組</b>（＋／−）。', '按 <b>隨機分</b> 當場分好；或按 <b>手動分組</b>，點學生（可以多選）再點要放的那一組，也可以直接拖過去。', '每一組右上角的「組長」選單選一位組長。', '勾「之後每一堂課都用這個分組」就變成這個班的預設。'],
+    tips: ['分組 <b>自動儲存</b>，停手一秒就存好，沒有儲存鈕。', '按「不分組」會先問你一次。'],
+    screen: () => sessionPage('分組', `
+      <div class="row"><span class="field">幾組<span class="row"><span class="btn">−</span><b class="mono">6</b><span class="btn">＋</span></span></span><span class="btn p">隨機分</span><span class="btn">手動分組</span>${pill('已自動儲存', 'ok')}</div>
+      <div class="groups">${GROUPS.map(g => `<div class="group" style="--c:${g.c}"><div class="gh"><span>${g.name}</span><span style="font-weight:500">組長 ${g.lead} 號 ▾</span></div><div class="chips">${g.seats.map(no => `<span class="${no === g.lead ? 'lead-s' : ''}">${no} ${NAMES[no - 1]}</span>`).join('')}</div></div>`).join('')}</div>
+      <div class="chk on"><i>✓</i><span>之後每一堂課都用這個分組</span></div>`) },
+
+  { id: 'guide', stage: 'prep', title: 'AI 引導', short: '學生 APP 的 AI 小幫手怎麼帶', where: ['點這一堂', '備課 › AI 引導'],
+    why: '學生在 APP 問 AI 時，小幫手照這裡的設定回答。八格都已經勾好預設句子，不改也能用。',
+    how: ['八格照 PROGRESS 排：角色設計、補充資料、學習目標、問候訊息、注意事項、互動指引、教學策略、學習內容。', '每格勾要用的句子，句子可以改字、也可以自己加；<b>｛課程名稱｝｛年級｝｛領域｝｛單元名稱｝</b> 會自動帶入。', '「互動指引」選 <b>答案給到哪</b>：只問不答、給提示不給答案、可以給答案（可以多選）。', '每個 APP 大題、臨時任務可以另外打一句專屬指令。'],
+    tips: ['設定 <b>自動儲存</b>，整門課共用同一份。', '「不代寫」「不直接給結論」「不打分數」由平台用程式擋，不只寫在提示裡。'],
+    screen: () => sessionPage('AI 引導', `
+      <span>${pill('已自動儲存', 'ok')}</span>
+      <div class="slot"><div class="sh"><i>P</i>角色設計</div><div class="chk on"><i>✓</i><span>你是陪｛年級｝學生學｛領域｝的學習夥伴，說話親切、句子短。</span></div></div>
+      <div class="slot"><div class="sh"><i>O</i>學習目標</div><div class="chk on"><i>✓</i><span>學生能說出水蒸發與凝結時看得到的變化。</span></div><div class="chk"><i></i><span>學生能用自己的話解釋「水循環」。</span></div></div>
+      <div class="slot"><div class="sh"><i>E</i>互動指引・答案給到哪</div><div class="row"><span class="chk on"><i>✓</i>只問不答</span><span class="chk on"><i>✓</i>給提示不給答案</span><span class="chk"><i></i>可以給答案</span></div></div>
+      <div class="slot"><div class="sh"><i>R</i>注意事項</div><div class="chk on"><i>✓</i><span>不代寫作業</span></div><div class="chk lock"><i>🔒</i><span>不打分數、不評價學生（平台固定）</span></div></div>
+      <div class="slot"><div class="sh" style="font-weight:500">大題 1 的專屬指令</div><span class="input">請學生先描述看到的，再猜原因，不要一開始就講凝結。</span></div>`) },
+
+  { id: 'note', stage: 'prep', title: '教學筆記', short: '這堂課的安排與紀錄', where: ['點這一堂', '備課 › 教學筆記'],
+    why: '寫給自己看的：這堂課打算怎麼上、上完記一兩句。只有你看得到。',
+    how: ['打字，按 <b>儲存筆記</b>。'],
+    tips: ['不寫也沒關係，平台其他功能不需要它。'],
+    screen: () => sessionPage('教學筆記', `
+      <div class="card"><b>教學筆記</b><span class="lead">這節課的筆記已儲存，86 字。</span>
+      <div class="input" style="min-height:120px;white-space:pre-line;font-size:13px">1. 先用冰水杯引起動機（5 分鐘）
+2. 分組做冰塊融化實驗，用 APP 每 5 分鐘拍一張
+3. 最後 10 分鐘投影兩組的照片討論
+課後：第 4 組的照片都糊了，下次提醒擦鏡頭。</div>
+      <span class="btn p" style="align-self:flex-start">儲存筆記</span></div>`) },
+
+  { id: 'home', stage: 'live', title: '首頁：上課三步', short: '選課程 → 選單元 → 開始上課', where: ['首頁'],
+    why: '每天上課從首頁開始，三步就開好今天這一堂，節次平台照作息自動判斷。',
+    how: ['<b>選課程</b>：一門課一張卡，標著上次上到哪。', '<b>選授課單元</b>。', '按 <b>〔開始上課〕</b>，就到這一堂的「開始上課」頁。'],
+    tips: ['今天這一堂已經記在別的單元時，平台會先問你，不會默默開進去。', '還沒建課程的班，首頁會給你「新增課程」的連結。'],
+    screen: () => frame('/home', '首頁', `
+      ${stepsBar(['選課程', '選單元', '開始上課'], 1)}
+      <p class="lead">${COURSE}　<span style="color:var(--brand)">← 換一門課</span></p>
+      ${UNITS.map((u, i) => `<div class="card" style="${i === 1 ? 'border-color:var(--brand);border-width:2px' : ''}"><div class="ttl"><b>${u}</b>${i === 1 ? pill('上次上到這裡', 'ok') : ''}</div></div>`).join('')}
+      <div class="card" style="background:var(--surface-2)"><b>最近的課</b><span class="lead">${COURSE}・上過 5 堂・最近 11/11 ${UNITS[1]}</span></div>`) },
+
+  { id: 'start', stage: 'live', title: '開始上課：QR 與加入碼', short: '學生掃碼、選座號', where: ['點這一堂', '開始上課 › 開始上課'],
+    why: '學生用 APP 掃 QR 或打六位數加入碼，選自己的座號，就連進這一堂。',
+    how: ['點 QR 會 <b>放大蓋滿畫面</b> 給全班看，旁邊的已加入名單 <b>只顯示座號</b>。', '你自己的小畫面看得到姓名與誰還沒加入。', '有學生選錯座號，在名單上按 × <b>移除</b>，那台 APP 會回到選座號。', '下課按 <b>結束這堂課</b>；不按的話三小時後自動關。'],
+    tips: ['一組 QR 用三小時。中途跳出、回來會接回原本那一組，不用重掃。', '按「產生新的 QR code」舊的會關掉，全班要重掃。', '沒網路時學生拍的東西會留在平板，下課後 7 天內補傳都收得到。'],
+    screen: () => sessionPage('開始上課', `
+      <div class="qr">${qrSvg()}<div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+        <span class="lead">加入碼</span><span class="code6">482 917</span>
+        <span class="lead">開到 16:40（還有 2 小時 41 分）</span>
+        <div class="row"><span class="btn">放大給全班看</span><span class="btn">產生新的 QR code</span><span class="btn" style="color:var(--bad)">結束這堂課</span></div>
+      </div></div>
+      <div class="card"><div class="ttl"><b>已加入 22 位</b><small>還沒加入：14 號 ${NAMES[13]}、21 號 ${NAMES[20]}</small></div>
+      <div class="chips">${WALL.filter(r => r.joined).slice(0, 12).map(r => `<span>${r.no} ${NAMES[r.no - 1]} ×</span>`).join('')}<span>…</span></div></div>
+      <div class="row">${pill('影音授權：全班同意，1 位不授權', 'ok')}</div>`) },
+
+  { id: 'progress', stage: 'live', title: '教師導學：進度', short: '誰交了、誰還沒加入', where: ['開始上課 › 教師導學', '進度'],
+    why: '上課中一眼看出每個座號每個任務收到幾件，誰還沒加入、誰的平板沒電。',
+    how: ['上排選看 <b>班級｜各小組｜個別學生</b>。', '第二排按 <b>進度</b>。', '格子是收到幾件，空的就是平台還沒收到。', '上課中每 20 秒自動更新。'],
+    tips: ['空格可能是還在做、還沒加入或平板沒連上，不一定是沒做。', '這裡不打分數，只有件數。'],
+    screen: () => sessionPage('教師導學', `
+      <div class="row"><span class="btn">班級</span><span class="btn">各小組</span><span class="btn p">個別學生</span></div>
+      <div class="row"><span class="btn p">進度</span><span class="btn">所有資料</span>${TASKS.map(t => `<span class="btn" style="border-left:4px solid ${t.c}">${t.label}</span>`).join('')}</div>
+      <div class="tbl-wrap"><table class="wall"><thead><tr><th>座號</th>${TASKS.map(t => `<th>${t.label} ${t.title}</th>`).join('')}<th>狀況</th></tr></thead>
+      <tbody>${WALL.slice(0, 10).concat(WALL.slice(13, 14)).map(r => `<tr><td>${r.no} ${NAMES[r.no - 1]}</td>${r.cells.map(n => `<td class="n ${n ? '' : 'z'}">${n ? `<b>${n}</b>` : '·'}</td>`).join('')}<td>${!r.joined ? pill('還沒加入', 'grey') : r.battery ? pill('電量低', 'warn') : r.offline ? pill('沒連上', 'warn') : ''}</td></tr>`).join('')}</tbody></table></div>`) },
+
+  { id: 'works', stage: 'live', title: '教師導學：學生交的東西', short: '照片、文字、錄音，點了就投影', where: ['開始上課 › 教師導學', '所有資料／各活動'],
+    why: '學生交的照片、影片、文字、語音照任務排好。點任何一件就全螢幕，直接帶全班討論。',
+    how: ['第二排選 <b>所有資料</b> 或某一個大題、任務。', '照小組看：上排按 <b>各小組</b>，一組一張卡、標出組長。', '<b>點任何一件就全螢幕</b>，左右翻下一件；全螢幕只顯示座號。', '便條會標「第 2 版」「問過 AI 後修改」（紫色）或「自己寫的，沒問 AI」（綠色）。'],
+    tips: ['學生選錯座號交了一整節：在那張便條按「搬到別的座號」。', '照片、錄音可以按「AI 描述與逐字稿」請 AI 先整理。', '下課後看到的照片、影片是遮臉後的版本，要看原檔得填理由。'],
+    screen: () => sessionPage('教師導學', `
+      <div class="row"><span class="btn">班級</span><span class="btn p">各小組</span><span class="btn">個別學生</span></div>
+      <div class="row"><span class="btn">進度</span><span class="btn p">所有資料</span><span class="btn">小組討論</span></div>
+      <div class="grid2">
+        <div class="note" style="--c:var(--g1)"><div class="h"><b>5 號・組長</b>${pill('大題 1')}<span>照片</span></div><div class="photo">杯子外面的水珠（示意）</div></div>
+        <div class="note" style="--c:var(--g1)"><div class="h"><b>9 號</b>${pill('大題 1')}<span>文字</span></div><p class="q"><b>題目</b>杯子外面的水是從哪裡來的？</p><p>空氣裡的水蒸氣碰到冰冰的杯子，變回小水滴。</p><div class="row">${pill('第 2 版')}${pill('問過 AI 後修改', 'ai')}</div></div>
+        <div class="note" style="--c:var(--g4)"><div class="h"><b>13 號</b>${pill('任務 1')}<span>語音 0:24</span></div><p>我們這杯是保麗龍的，十分鐘了冰塊還很大。</p><div class="row">${pill('第 1 版')}${pill('自己寫的，沒問 AI', 'ok')}</div></div>
+      </div>
+      <div class="full"><span class="seatbig">9 號</span><p>空氣裡的水蒸氣碰到冰冰的杯子，變回小水滴。</p><small>全螢幕・只顯示座號　← 2／31 →</small></div>`) },
+
+  { id: 'summary', stage: 'live', title: '學習摘要', short: '這一堂的數字＋AI 整理', where: ['開始上課 › 學習摘要'],
+    why: '課堂中很快抓到全班（或某一組、某一位）的狀況：收到多少、學生想法有哪幾類、有什麼迷思，加上教學建議。',
+    how: ['最上面選看 <b>班級｜各小組｜個別學生</b>。', '數字卡每 30 秒自動更新，都是收到幾件這種事實。', '按 <b>更新摘要</b> 才請 AI 整理：思考類型、迷思概念、提問類型……每一類都附學生原句。', '「其他整理方式」還有想法分類、團討問題、各組比較，也可以自己問。'],
+    tips: ['AI 只描述學生的回覆，<b>不打分數、不排高低</b>。', '送給 AI 的只有學生代碼，沒有姓名。'],
+    screen: () => sessionPage('學習摘要', `
+      <div class="row"><span class="btn p">班級</span><span class="btn">各小組</span><span class="btn">個別學生</span><span class="btn p" style="margin-left:auto">更新摘要</span></div>
+      <div class="grid3">${[['收到', '61 件'], ['照片', '24 張'], ['文字', '29 段'], ['問 AI', '47 句'], ['修改', '12 次']].map(([k, v]) => `<div class="card stat"><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+      <div class="card"><div class="row"><b>迷思概念</b>${pill('AI 判讀', 'ai')}</div><p style="font-size:13px">有 4 位認為水珠是「杯子裡的水滲出來」。<br><span class="lead">原句：「冰水從杯子的縫流出來了」（7 號）</span></p></div>
+      <div class="card"><div class="row"><b>教學建議</b>${pill('AI 判讀', 'ai')}</div><p style="font-size:13px">可以拿一個裝熱水的杯子對照：熱水杯外面沒有水珠，請學生想為什麼。</p></div>`) },
+
+  { id: 'inclass', stage: 'after', title: '學習歷程：課中紀錄', short: '每一堂學生交的東西', where: ['學習歷程', '課中紀錄'],
+    why: '跨堂看學生在課堂上交過什麼：選班級、選看誰、選課程與單元，一節一列，點開才讀。',
+    how: ['先 <b>選班級</b>，再選看 <b>全班｜小組｜個別學生</b>，以及課程、單元。', '下面一排分頁可以左右滑：課中紀錄、課後作業、學習資料分析、行為分析、班級儀表板。', '點一節展開，便條跟教師導學一樣，可以全螢幕。'],
+    tips: ['點「到這一堂的教師導學」可以回到那一堂。'],
+    screen: () => frame('/learning', '學習歷程', `
+      <div class="row"><span class="field">班級<span class="input">${CLS}</span></span><span class="field">看誰<span class="input">個別學生：9 號</span></span><span class="field">課程<span class="input">${COURSE}</span></span><span class="field">單元<span class="input">全部</span></span></div>
+      ${learningTabs('課中紀錄')}
+      ${[['11/13', UNITS[1], 7], ['11/11', UNITS[1], 5], ['11/06', UNITS[0], 4], ['11/04', UNITS[0], 3]].map(([d, u, n], i) => `<div class="card"><div class="ttl"><b>${d}　${u}</b><small>收到 ${n} 件 ${i ? '▸' : '▾'}</small></div>${i ? '' : `<div class="grid2"><div class="note" style="--c:var(--g1)"><div class="h">大題 1・文字</div><p>空氣裡的水蒸氣碰到冰冰的杯子，變回小水滴。</p></div><div class="note" style="--c:var(--g4)"><div class="h">任務 1・照片</div><div class="photo">冰塊第 10 分鐘（示意）</div></div></div>`}</div>`).join('')}`) },
+
+  { id: 'homework', stage: 'after', title: '課後作業', short: '上傳學生的作業與紀錄', where: ['學習歷程', '課後作業'],
+    why: '學生課後交的紙本作業、作品照片、錄音，由你拍照上傳，跟課堂資料放在一起看。',
+    how: ['按 <b>上傳檔案</b>，選這是 <b>個人</b> 的還是 <b>哪一組</b> 的。', '選小組時，組員每人各記一筆。', '也可以直接寫一筆學習紀錄（文字）。'],
+    tips: ['學習單上印著學生姓名的，上傳前請先遮掉。', '寫紀錄時打了學生全名，平台存檔前會提醒你。'],
+    screen: () => frame('/learning', '學習歷程', `
+      ${learningTabs('課後作業')}
+      <div class="card" style="border-style:dashed"><b>上傳檔案</b><div class="row"><span class="field">屬於<span class="input">第 3 組（4 位）</span></span><span class="field">單元<span class="input">${UNITS[1]}</span></span><span class="btn p">選檔案</span></div></div>
+      <div class="tbl-wrap"><table><thead><tr><th>日期</th><th>誰</th><th>內容</th><th>形式</th></tr></thead><tbody>
+        <tr><td>11/12</td><td>第 3 組</td><td>水循環海報</td><td>照片</td></tr>
+        <tr><td>11/12</td><td>9 號</td><td>蒸發實驗學習單</td><td>PDF</td></tr>
+        <tr><td>11/07</td><td>5 號</td><td>「我看到的凝結」口頭報告</td><td>錄音 1:12</td></tr>
+      </tbody></table></div>`) },
+
+  { id: 'analysis', stage: 'after', title: '學習資料分析', short: '做過的 AI 分析都在這裡', where: ['學習歷程', '學習資料分析'],
+    why: '這個範圍（全班、某一組或某一位）做過的 AI 分析都收在這一頁，例如各堂課的學習摘要，課後可以回頭看。',
+    how: ['先選班級、看誰、課程。', '每次分析一筆，標著日期、是哪一種分析、依據幾筆資料。', '點開看 AI 的整理、建議與向度表；不要的可以刪除。', '要做新的分析：課中用那一堂的「學習摘要」，課後用「學習紀錄探究」或 AI 助手。'],
+    tips: ['送給 AI 的只有學生代碼，回來的結果畫面上換回座號。', '這些都是 AI 的判讀，請對照學生的原句。'],
+    screen: () => frame('/learning', '學習歷程', `
+      ${learningTabs('學習資料分析')}
+      <div class="row"><span class="lead">範圍：${CLS}・全班・${COURSE}</span></div>
+      <div class="card"><div class="ttl"><b>11/13　學習摘要</b><small>依據 28 筆</small></div><p style="font-size:13px">多數回覆描述了水珠出現的現象，約三分之一提到原因。</p><div class="row">${pill('AI 判讀', 'ai')}<span class="btn">展開</span><span class="btn">刪除</span></div></div>
+      <div class="card"><div class="ttl"><b>11/11　行為分析</b><small>依據 61 筆</small></div><p style="font-size:13px">問「為什麼」的 9 位、直接要答案的 3 位。</p><div class="row">${pill('AI 判讀', 'ai')}<span class="btn">展開</span><span class="btn">刪除</span></div></div>`) },
+
+  { id: 'behaviour', stage: 'after', title: '行為分析', short: 'APP 操作時間＋AI 歸類', where: ['學習歷程', '行為分析'],
+    why: '看學生在 APP 上怎麼做：花多久、問了幾次 AI、改了幾次。下半按了才請 AI 依研究文獻的向度歸類。',
+    how: ['上半是 <b>事實</b>：操作時間、每一步花多久、問 AI、修改、送出幾次。', '按 <b>開始分析</b>，AI 依向度歸類（求助型態、提問類型、修改行為……），每一類列出哪幾位與原句。'],
+    tips: ['時間包含網路、裝置、老師指示的影響，<b>不代表能力</b>。', '操作紀錄只有動作與次數，沒有學生打的字。'],
+    screen: () => frame('/learning', '學習歷程', `
+      ${learningTabs('行為分析')}
+      <div class="grid3">${[['平均操作時間', '18 分'], ['問 AI', '平均 4.2 次'], ['修改', '平均 1.6 次'], ['採用 AI 建議', '31 次']].map(([k, v]) => `<div class="card stat"><span>${k}</span><b style="font-size:18px">${v}</b></div>`).join('')}</div>
+      <div class="card"><b>每一步花多久（全班中位數）</b><div class="bars">${[['觀察', 6.2], ['問 AI', 4.1], ['驗證', 5.4], ['修改', 2.3]].map(([k, v]) => `<div><span>${k}</span><u style="width:${v / 6.5 * 100}%"></u><em>${v} 分</em></div>`).join('')}</div></div>
+      <div class="card"><div class="row"><b>求助型態</b>${pill('AI 判讀', 'ai')}</div><p style="font-size:13px">問「為什麼」想自己弄懂：9 位　｜　直接要答案：3 位　｜　沒有問 AI：2 位</p></div>`) },
+
+  { id: 'dashboard', stage: 'after', title: '班級儀表板', short: '收件數字與下載 CSV', where: ['學習歷程', '班級儀表板'],
+    why: '整門課（或某個單元）收了多少、哪幾種、每個學生在每個單元交了幾件，加上一段照數字寫的總結。',
+    how: ['選課程與單元（或全部）。', '看數字卡、交件種類、學生 × 單元的收件表。', '要存檔，按 <b>下載 CSV</b>（只有代碼與數字，沒有姓名）。', '想要文字總結，按「請 AI 寫一段總結」。'],
+    tips: ['「沒收到」不表示沒有做；整節沒人交的那一節當作沒用 APP，不拿來算誰沒交。'],
+    screen: () => frame('/learning', '學習歷程', `
+      ${learningTabs('班級儀表板')}
+      <div class="row" style="justify-content:flex-end"><span class="btn">下載 CSV</span></div>
+      <div class="grid3">${[['上了', '5 堂'], ['收到', '213 件'], ['交過的座號', '23／24'], ['問 AI', '188 句']].map(([k, v]) => `<div class="card stat"><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+      <div class="tbl-wrap"><table><thead><tr><th>座號</th>${UNITS.map(u => `<th>${u}</th>`).join('')}</tr></thead><tbody>${DASH.map(([no, ...c]) => `<tr><td>${no}</td>${c.map(n => `<td>${n == null ? '—' : n}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <p class="lead">總結：「蒸發與凝結」收到的照片比「水的三態」多一倍；「水循環」還沒上。</p>`) },
+
+  { id: 'explore', stage: 'after', title: '學習紀錄探究', short: '跨堂跟 AI 對話', where: ['學習紀錄探究'],
+    why: '課後想深入了解：選好範圍直接問 AI，它會讀那個範圍的課堂紀錄、作業與你寫的紀錄來回答。',
+    how: ['選班級、看誰、課程、單元。', '在下面打你的問題，例如「第 3 組這三堂的想法有什麼變化？」', '可以一直追問；換範圍就是新的一段對話。'],
+    tips: ['跟「學習摘要」的分工：學習摘要看這一堂、課中用；探究是課後、跨堂、可以對話。'],
+    screen: () => frame('/explore', '學習紀錄探究', `
+      <div class="row"><span class="field">範圍<span class="input">${CLS}・第 3 組・${COURSE}・全部單元</span></span></div>
+      <div class="card chat">
+        <p class="me">第 3 組這三堂對「凝結」的說法有什麼變化？</p>
+        <p class="bot">11/04 有 3 位說水是「從杯子滲出來」；到 11/13，11 號與 15 號改成「空氣裡的水蒸氣遇冷變成水」，7 號仍寫「冰水流出來」。下一堂可以請 11 號跟 7 號一起做熱水杯對照。</p>
+        <p class="me">7 號問了 AI 什麼？</p>
+        <p class="bot">7 號問了 2 次：「為什麼杯子會流汗」「水會穿過杯子嗎」。</p>
+      </div>
+      <div class="row"><span class="input" style="flex:1">繼續問…</span><span class="btn p">送出</span></div>`) },
+
+  { id: 'export', stage: 'after', title: '學生學習歷程與下載', short: '這一堂的時間軸、下載資料', where: ['點一堂', '學習歷程 › 學生學習歷程／下載學習資料'],
+    why: '這一堂選單最下面兩項：看學生依時間做了什麼，以及把學生交的東西下載下來保存。',
+    how: ['<b>學生學習歷程</b>：每位學生一列，依時間標出交件、問 AI。', '<b>下載學習資料</b>：選一節、幾節或整門課，存到 <b>這台電腦</b>（一節一個 zip）或 <b>自己的雲端硬碟</b>。', '預設下載遮臉版；真的需要原檔，勾「由我自行保管與使用」。'],
+    tips: ['檔名只有座號與任務編號，不會有姓名。', '下載到你電腦或雲端硬碟的那一份，由你保管。'],
+    screen: () => sessionPage('學生學習歷程', `
+      <div class="card"><b>學生學習歷程</b><span class="lead">13:40 → 14:20</span>
+        <div class="timeline">${TRACKS.map((t, i) => `<div class="tl-row"><span>${i + 1} 號</span><div class="tl-track">${t.map((x, k) => `<u style="left:${x * 100}%;width:${4 + k * 2}%;background:${['var(--g1)', 'var(--ai)', 'var(--g4)'][k]}"></u>`).join('')}</div></div>`).join('')}</div>
+        <div class="row" style="font-size:12px"><span style="color:var(--g1)">■ 大題 1</span><span style="color:var(--ai)">■ 問 AI</span><span style="color:var(--g4)">■ 任務 1</span></div></div>
+      <div class="card"><b>下載學習資料</b><div class="row"><span class="field">範圍<span class="input">這一節</span></span><span class="field">存到<span class="input">這台電腦（zip）</span></span><span class="btn p">開始下載</span></div><span class="lead">照片與影片是遮臉版。</span></div>`) },
+
+  { id: 'assistant', stage: 'other', title: 'AI 助手', short: '學情分析、依課程調整的教學引導', where: ['右側 AI 助手'],
+    why: '任何一頁都能打開。選一個班，問學習狀況，或請它依名冊上的「課程調整」給你具體的教學做法。',
+    how: ['打開右側 <b>AI 助手</b>，先選班級（它只讀選的那一班）。', '勾「我已確認內容」之後才能提問。', '按「分析」或直接問；寫過課程調整的學生會另外列「依課程調整的教學引導」：在哪個單元、怎麼做、怎麼看有沒有效。', '模型可以在選單裡換，沒選過就用預設的。'],
+    tips: ['AI 不做診斷，也不擴大解讀課程調整的內容。'],
+    screen: () => frame('/home', '首頁', `
+      <div class="split">
+        <div class="card" style="opacity:.55"><b>首頁</b><span class="lead">（AI 助手打開時，原本的頁面還在旁邊）</span></div>
+        <div class="card"><div class="ttl"><b>AI 助手　教學與學情</b><small>✕</small></div>
+          <span class="field">班級<span class="input">${CLS}</span></span>
+          <div class="chk on"><i>✓</i><span style="font-size:12px">我已確認內容，同意送出分析</span></div>
+          <div class="card" style="background:var(--surface-2)"><div class="row"><b>2 號・依課程調整的教學引導</b>${pill('AI', 'ai')}</div>
+          <p style="font-size:12.5px">調整內容：閱讀長題目需要比較多時間。<br>「蒸發與凝結」的實驗步驟改成三張圖卡，一次給一張；看他能不能不靠口頭提醒做完第三步。</p></div>
+        </div></div>`) },
+
+  { id: 'settings', stage: 'other', title: '設定', short: '個人資料、綁 Google', where: ['設定'],
+    why: '改姓名等個人資料，以及登入方式。',
+    how: ['<b>個人資料</b>：姓名、聯絡信箱。', '<b>登入方式</b>：按「綁定 Google 帳號」，之後可以用 Google 直接登入同一個帳號。'],
+    tips: ['畫面跳出「這個 Google 帳號已經綁在另一個帳號」時，平台會先試著自動處理；還是不行，用「回報問題」告訴研究團隊。'],
+    screen: () => frame('/settings', '設定', `
+      <div class="card"><b>個人資料</b><div class="grid3"><span class="field">姓名<span class="input">陳美玲</span></span><span class="field">學校<span class="input">${SCHOOL}</span></span><span class="field">帳號<span class="input">lili01</span></span></div></div>
+      <div class="card"><b>登入方式</b><div class="row"><span>帳號與密碼</span>${pill('使用中', 'ok')}</div><div class="row"><span>Google 帳號</span>${pill('還沒綁', 'grey')}<span class="btn p">綁定 Google 帳號</span></div><div class="row"><span>信箱</span>${pill('已綁 chen.teacher@…', 'ok')}</div></div>`) },
+
+  { id: 'report', stage: 'other', title: '回報問題', short: '平台怪怪的就按這裡', where: ['右上角帳號選單', '回報問題'],
+    why: '發現哪裡不能用、看不懂，寫幾句話送給研究團隊。你在哪一頁、用什麼瀏覽器，平台會自己帶上。',
+    how: ['按右上角你的名字，選 <b>回報問題</b>。', '寫發生什麼事、你按了什麼。', '按 <b>送出</b>。'],
+    tips: ['提到學生請寫 <b>座號</b>，不要寫姓名；平台送出前也會把你班上學生的姓名換成代碼。'],
+    screen: () => frame('/home', '首頁', `
+      <div class="row" style="justify-content:flex-end"><div class="card menu"><span>設定</span><span class="on">回報問題</span><span>登出</span></div></div>
+      <div class="card" style="max-width:420px;align-self:center;width:100%"><b>回報問題</b>
+        <div class="input" style="min-height:90px;font-size:13px">教師導學的「進度」分頁，14 號明明有交照片，格子還是空的。重新整理也一樣。</div>
+        <span class="lead">會一起送出：你在哪一頁（教師導學）、瀏覽器、畫面大小。</span>
+        <div class="row" style="justify-content:flex-end"><span class="btn">取消</span><span class="btn p">送出</span></div></div>`) },
+];
+
+/* ───── 畫出來 ───── */
+const stageOf = k => STAGES.find(s => s.key === k);
+const lanes = document.getElementById('lanes');
+const stepEl = document.getElementById('step');
+document.getElementById('legend').innerHTML = STAGES.map(s => `<span style="--c:${s.c}"><i></i>${s.name.slice(2)}</span>`).join('');
+lanes.innerHTML = STAGES.map(st => `<div class="lane" style="--c:${st.c}">
+  <div class="lane-head"><b>${st.name}</b><small>${st.hint}</small></div>
+  ${STEPS.filter(x => x.stage === st.key).map(x => `<button type="button" class="node" data-id="${x.id}" style="--c:${st.c}"><span class="num">${STEPS.indexOf(x) + 1}</span><span><b>${x.title}</b><small>${x.short}</small></span></button>`).join('')}
+</div>`).join('');
+
+
+let view = 'shot';
+const shotSrc = name => `shots/${name}.webp`;
+function shotHtml(shots, k) {
+  const [name, cap] = shots[k];
+  return `<div class="shot">
+    <figure><button type="button" class="zoom" data-k="${k}" aria-label="放大這張截圖"><img src="${shotSrc(name)}" alt="${cap}" loading="lazy" width="2720" height="1614"></button><figcaption>${cap}</figcaption></figure>
+    ${shots.length > 1 ? `<div class="thumbs" role="group" aria-label="這一步的截圖">${shots.map(([n, c], j) => `<button type="button" data-k="${j}" aria-current="${j === k}" aria-label="第 ${j + 1} 張：${c}"><img src="${shotSrc(n)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}
+    <p class="shot-note">點截圖可以放大看。截圖是平台的假資料版，資料都是假的。</p>
+  </div>`;
+}
+function wireShots(shots) {
+  const v = stepEl.querySelector('#viewer');
+  if (!v || !shots.length) return;
+  v.querySelectorAll('.thumbs button').forEach(b => b.onclick = () => { v.innerHTML = shotHtml(shots, +b.dataset.k); wireShots(shots); });
+  const z = v.querySelector('.zoom');
+  if (z) z.onclick = () => openLightbox(shots[+z.dataset.k]);
+}
+const lb = document.getElementById('lightbox');
+let lbReturn = null;
+function openLightbox([name, cap]) {
+  lbReturn = document.activeElement;
+  document.getElementById('lb-img').src = shotSrc(name);
+  document.getElementById('lb-img').alt = cap;
+  document.getElementById('lb-cap').textContent = cap;
+  lb.hidden = false;
+  document.getElementById('lb-close').focus();
+}
+function closeLightbox() { lb.hidden = true; if (lbReturn) lbReturn.focus(); }
+document.getElementById('lb-close').onclick = closeLightbox;
+lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('lb-img')) closeLightbox(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !lb.hidden) closeLightbox(); });
+
+function show(id, scroll) {
+  const i = Math.max(0, STEPS.findIndex(x => x.id === id));
+  const x = STEPS[i]; const st = stageOf(x.stage);
+  const shots = SHOTS[x.id] || [];
+  if (!shots.length) view = 'mock';
+  lanes.querySelectorAll('.node').forEach(n => { if (n.dataset.id === x.id) n.setAttribute('aria-current', 'step'); else n.removeAttribute('aria-current'); });
+  stepEl.innerHTML = `<div class="guide">
+      <span class="stage-tag" style="--c:${st.c}"><i></i>${st.name}</span>
+      <h2>${i + 1}. ${x.title}</h2>
+      <div class="crumb"><em>在哪裡：</em>${x.where.map(w => `<span>${w}</span>`).join('<em>›</em>')}</div>
+      <p class="why">${x.why}</p>
+      <h3>怎麼做</h3>
+      <ol class="howto">${x.how.map(h => `<li><span>${h}</span></li>`).join('')}</ol>
+      ${x.tips && x.tips.length ? `<div class="tips"><h3>小提醒</h3><ul>${x.tips.map(t => `<li>${t}</li>`).join('')}</ul></div>` : ''}
+      <div class="pager">
+        <button type="button" id="prev" ${i === 0 ? 'disabled' : ''}>← ${i ? STEPS[i - 1].title : '上一步'}</button>
+        <span class="count">${i + 1}／${STEPS.length}</span>
+        <button type="button" id="next" class="primary" ${i === STEPS.length - 1 ? 'disabled' : ''}>${i < STEPS.length - 1 ? STEPS[i + 1].title : '最後一步'} →</button>
+      </div>
+    </div>
+    <div style="min-width:0">
+      <div class="view-tabs" role="group" aria-label="看哪一種畫面"><button type="button" data-view="shot" aria-pressed="${view === 'shot'}">實際畫面截圖${shots.length > 1 ? `（${shots.length} 張）` : ''}</button><button type="button" data-view="mock" aria-pressed="${view === 'mock'}">示意圖</button></div>
+      <div id="viewer">${view === 'shot' ? shotHtml(shots, 0) : x.screen()}</div>
+    </div>`;
+  stepEl.querySelectorAll('.view-tabs button').forEach(b => b.onclick = () => { view = b.dataset.view; show(x.id, false); });
+  wireShots(shots);
+  stepEl.querySelector('#prev').onclick = () => go(STEPS[i - 1] && STEPS[i - 1].id);
+  stepEl.querySelector('#next').onclick = () => go(STEPS[i + 1] && STEPS[i + 1].id);
+  if (scroll) {
+    let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    stepEl.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }
+}
+function go(id) { if (!id) return; if (location.hash !== '#' + id) location.hash = id; else show(id, true); }
+lanes.addEventListener('click', e => { const b = e.target.closest('.node'); if (b) go(b.dataset.id); });
+window.addEventListener('hashchange', () => show(location.hash.slice(1), true));
+show(location.hash.slice(1) || STEPS[0].id, false);
+</script>
+
+</body></html>
